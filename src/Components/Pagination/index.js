@@ -42,6 +42,7 @@ export default class Pagination extends Component {
     let classNames = "pagination-btn";
 
     // May need refactor
+    // eslint-disable-next-line
     if (this.state.currentPage == text) {
       classNames += " current-page";
     }
@@ -73,6 +74,7 @@ export default class Pagination extends Component {
   };
 
   static getDerivedStateFromProps(nextProps, prevState) {
+    // eslint-disable-next-line
     if (nextProps.currentPage != prevState.currentPage) {
       return {
         currentPage: nextProps.currentPage,
@@ -84,6 +86,7 @@ export default class Pagination extends Component {
   render() {
     let totalRecords = this.props.totalRecords;
     let pages = Math.ceil(totalRecords / this.props.pageLength);
+    //console.log("this.props.pageLength", this.props.pageLength);
     this.pages = pages;
 
     let pageSelector = (
@@ -95,7 +98,7 @@ export default class Pagination extends Component {
             type="number"
             min="1"
             ref={(input) => (this.pageLengthInput = input)}
-            defaultValue={this.props.pageLength || 5}
+            defaultValue={this.props.pageLength || 2}
             onChange={this.onPageLengthChange}
           />
         </span>
