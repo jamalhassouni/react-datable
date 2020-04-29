@@ -2,13 +2,22 @@ import React from "react";
 import ReactDOM from "react-dom";
 import "./datatable.css";
 import Pagination from "../Pagination";
+import PropTypes from "prop-types";
 
 export default class DataTable extends React.Component {
   _preSearchData = null;
-
+  static defaultProps = {
+    currentPage: 1,
+    totalRecords: 5,
+    pagination: {
+      enabled: true,
+      pageLength: 5,
+      type: "long", // long, short
+    },
+  };
   constructor(props) {
     super(props);
-
+    console.log("props.pagination.pageLength", props);
     this.state = {
       headers: props.headers,
       data: props.data,
@@ -16,7 +25,7 @@ export default class DataTable extends React.Component {
       sortby: null,
       descending: null,
       search: false,
-      pageLength: this.props.pagination.pageLength || 5,
+      pageLength: props.pagination.pageLength || 5,
       currentPage: 1,
     };
 
@@ -358,7 +367,7 @@ export default class DataTable extends React.Component {
   };
 
   onGotoPage = (pageNo) => {
-    let pagedData = this.getPagedData(pageNo, this.state.pageLength);
+    let pagedData = this.getPagedData(pageNo, this.props.pagination.pageLength);
     this.setState({
       pagedData: pagedData,
       currentPage: pageNo,
@@ -373,6 +382,7 @@ export default class DataTable extends React.Component {
 
   //todo:
   static getDerivedStateFromProps(nextProps, prevState) {
+    // eslint-disable-next-line
     if (nextProps.data.length != prevState.data.length) {
       return {
         headers: nextProps.headers,
@@ -388,16 +398,17 @@ export default class DataTable extends React.Component {
   }
 
   render() {
+    console.log("props.pagination", this.props);
     return (
       <div className={this.props.className}>
         {this.pagination.enabled && (
           <Pagination
             type={this.props.pagination.type}
-            totalRecords={this.state.data.length}
-            pageLength={this.state.pageLength}
+            totalRecords={this.props.totalRecords}
+            pageLength={this.props.pagination.pageLength}
             onPageLengthChange={this.onPageLengthChange}
             onGotoPage={this.onGotoPage}
-            currentPage={this.state.currentPage}
+            currentPage={this.props.currentPage}
           />
         )}
         {this.renderToolbar()}
@@ -406,3 +417,31 @@ export default class DataTable extends React.Component {
     );
   }
 }
+
+// DataTable.defaultProps = {
+//   currentPage: 1,
+//   totalRecords: 5,
+//   pagination: {
+//     enabled: true,
+//     pageLength: 5,
+//     type: "long", // long, short
+//   },
+// };
+
+DataTable.propTypes = {
+  currentPage: PropTypes.number.isRequired,
+  totalRecords: PropTypes.number.isRequired,
+  pagination: PropTypes.shape({
+    enabled: PropTypes.bool.isRequired,
+    pageLength: function (props, propName, componentName) {
+      // eslint-disable-next-line
+      if (
+        props["enabled"] == true &&
+        (props[propName] == undefined || typeof props[propName] != "number")
+      ) {
+        throw new Error("Please provide pageLength paginate Proprty");
+      }
+    },
+    type: PropTypes.string.isRequired,
+  }),
+};
