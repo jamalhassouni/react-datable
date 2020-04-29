@@ -6,7 +6,6 @@ import fetch from "isomorphic-unfetch";
 class App extends Component {
   constructor(props) {
     super(props);
-    this.onAddRow = this.onAddRow.bind(this);
     this.state = {
       headers: [
         //{title:"Id",accessor: "id", index: 0, dataType: "number"},
@@ -81,23 +80,6 @@ class App extends Component {
     });
   };
 
-  // todo:
-  onAddRow() {
-    let id = +new Date();
-    var newRow = {
-      id: id,
-      name: "name " + id,
-      age: 34,
-      qualification: "Graduate",
-      rating: 4,
-      profile: "https://via.placeholder.com/150",
-    };
-
-    this.setState({
-      data: [newRow, ...this.state.data],
-    });
-  }
-
   /**
    * search For Doctors by specility | name | country | city | gender | price | rating
    *
@@ -161,7 +143,6 @@ class App extends Component {
     };
     return (
       <div>
-        <button onClick={this.onAddRow}>Add random row</button>
         <DataTable
           className="data-table"
           title="USER PROFILES"
