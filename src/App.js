@@ -56,10 +56,10 @@ class App extends Component {
         },
       ],
       data: [],
-      current_page: null,
+      current_page: 1,
       last_page_url: null,
       next_page_url: null,
-      per_page: null,
+      per_page: 5,
       totalRecords: null,
       from: null,
       to: null,
@@ -113,7 +113,7 @@ class App extends Component {
 
         return data.data;
       } else {
-        return [];
+        return {};
       }
     } catch (err) {
       console.error("error", err);
@@ -137,7 +137,7 @@ class App extends Component {
   render() {
     console.log("state per_page", this.state.per_page);
     const pagination = {
-      enabled: false,
+      enabled: true,
       pageLength: this.state.per_page,
       type: "long", // long, short
     };
