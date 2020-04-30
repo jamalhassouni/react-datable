@@ -7,6 +7,7 @@
     "isomorphic-unfetch": "^3.0.0",
     "react": "^16.3.2",
     "react-dom": "^16.3.2",
+    "react-fast-compare": "^3.0.1",
     "react-scripts": "1.1.4"
   },
   "scripts": {
