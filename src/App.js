@@ -88,15 +88,10 @@ class App extends Component {
    *  @param {number} pageNumber
    *  @return {array} data
    */
-  search = async (values, url = null, pageNumber = null) => {
+  search = async (pageNumber = 1) => {
     let baseApiURL = "http://localhost:8000/api";
     try {
-      let searchURL;
-      if (url && pageNumber) {
-        searchURL = `${url}?page=${pageNumber}`;
-      } else {
-        searchURL = `${baseApiURL}/search`;
-      }
+      let searchURL = `${baseApiURL}/search?page=${pageNumber}`;
       const response = await fetch(searchURL, {
         method: "POST",
         headers: {
@@ -105,12 +100,10 @@ class App extends Component {
           "Access-Control-Allow-Origin": "*",
           "X-Requested-With": "XMLHttpRequest",
         },
-        body: JSON.stringify(values),
+        //body: JSON.stringify(values),
       });
       const data = await response.json();
       if (data.error === false) {
-        console.log("data", data);
-
         return data.data;
       } else {
         return {};
@@ -134,12 +127,23 @@ class App extends Component {
     });
   }
 
+  /***
+   * Handle Page Change
+   */
+  handlePageChange = async (pageNumber) => {
+    console.log("handlePageChange", pageNumber);
+    let res = await this.search(pageNumber);
+    this.setState({
+      data: res.data,
+      current_page: pageNumber,
+    });
+  };
   render() {
-    console.log("state per_page", this.state.per_page);
+    // console.log("state per_page", this.state.per_page);
     const pagination = {
-      enabled: true,
-      pageLength: this.state.per_page,
-      type: "long", // long, short
+      //enabled: true,
+      //pageLength: this.state.per_page,
+      //type: "long", // long, short
     };
     return (
       <div>
@@ -155,7 +159,9 @@ class App extends Component {
           noData="No records!"
           onUpdate={this.onUpdateTable}
           currentPage={this.state.current_page}
-          //totalRecords={20}
+          totalRecords={this.state.totalRecords}
+          pageRangeDisplayed={5}
+          onPageChange={this.handlePageChange}
         />
       </div>
     );
