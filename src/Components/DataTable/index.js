@@ -3,6 +3,8 @@ import ReactDOM from "react-dom";
 import "./datatable.css";
 import Pagination from "../Pagination";
 import PropTypes from "prop-types";
+import { isEmpty } from "../../utils";
+const isEqual = require("react-fast-compare");
 
 export default class DataTable extends React.Component {
   _preSearchData = null;
@@ -17,7 +19,6 @@ export default class DataTable extends React.Component {
   };
   constructor(props) {
     super(props);
-    console.log("props.pagination.pageLength", props);
     this.state = {
       headers: props.headers,
       data: props.data,
@@ -25,7 +26,7 @@ export default class DataTable extends React.Component {
       sortby: null,
       descending: null,
       search: false,
-      pageLength: props.pagination.pageLength || 5,
+      pageLength: props.pagination.pageLength,
       currentPage: 1,
     };
 
@@ -34,7 +35,9 @@ export default class DataTable extends React.Component {
     this.width = props.width || "100%";
 
     // Add pagination support
-    this.pagination = this.props.pagination || {};
+    console.log("this.props.pagination", this.props.pagination);
+    this.pagination = (!isEmpty(this.props.pagination) &&
+      this.props.pagination) || { enabled: true };
   }
 
   renderTableHeader = () => {
@@ -338,48 +341,74 @@ export default class DataTable extends React.Component {
   };
 
   onGotoPage = (pageNo) => {
+    console.log("pageNo", pageNo);
     let pagedData = this.getPagedData(pageNo, this.props.pagination.pageLength);
-    this.setState({
-      pagedData: pagedData,
-      currentPage: pageNo,
-    });
+    this.setState(
+      {
+        pagedData: pagedData,
+        currentPage: pageNo,
+      },
+      () => this.props.onPageChange(pageNo)
+    );
   };
 
   componentDidMount() {
-    if (this.pagination.enabled) {
-      this.onGotoPage(this.state.currentPage);
-    }
+    // if (this.pagination.enabled) {
+    //   this.onGotoPage(this.state.currentPage);
+    // }
   }
 
   //todo:
   static getDerivedStateFromProps(nextProps, prevState) {
     // eslint-disable-next-line
-    if (nextProps.data.length != prevState.data.length) {
+    if (!isEqual(nextProps.data, prevState.data)) {
       return {
         headers: nextProps.headers,
         data: nextProps.data,
         sortby: prevState.sortby,
         descending: prevState.descending,
         search: prevState.search,
-        currentPage: 1,
+        //currentPage: 1,
         pagedData: nextProps.data,
+      };
+      // eslint-disable-next-line
+    } else if (nextProps.currentPage != prevState.currentPage) {
+      console.log("here", nextProps.currentPage);
+      return {
+        currentPage: nextProps.currentPage,
       };
     }
     return null;
   }
+  handlePageChange(pageNumber) {
+    console.log(`active page is ${pageNumber}`);
+    //this.setState({activePage: pageNumber});
+  }
 
   render() {
-    console.log("props.pagination", this.props);
+    //console.log("props.pagination", this.props);
+    console.log("this.pagination.enabled", this.pagination.enabled);
+    console.log("this.state.currentPage", this.state.currentPage);
     return (
       <div className={this.props.className}>
         {this.pagination.enabled && (
           <Pagination
-            type={this.props.pagination.type}
-            totalRecords={this.props.totalRecords}
-            pageLength={this.props.pagination.pageLength}
-            onPageLengthChange={this.onPageLengthChange}
-            onGotoPage={this.onGotoPage}
-            currentPage={this.props.currentPage}
+            // type={this.props.pagination.type}
+            //totalRecords={this.props.totalRecords}
+            //pageLength={this.props.pagination.pageLength}
+            //onPageLengthChange={this.onPageLengthChange}
+            //onGotoPage={this.onGotoPage}
+            //currentPage={this.state.currentPage}
+            activePage={this.state.currentPage}
+            itemsCountPerPage={this.props.pagination.pageLength}
+            totalItemsCount={this.props.totalRecords}
+            onChange={this.onGotoPage.bind(this)}
+            pageRangeDisplayed={5}
+            //itemClass="item"
+            //innerClass=""
+            //activeClass="active"
+            //activeLinkClass="active"
+            //disabledClass="disabled item"
           />
         )}
         {this.renderToolbar()}
@@ -403,7 +432,7 @@ DataTable.propTypes = {
   currentPage: PropTypes.number.isRequired,
   totalRecords: PropTypes.number.isRequired,
   pagination: PropTypes.shape({
-    enabled: PropTypes.bool.isRequired,
+    enabled: PropTypes.bool,
     pageLength: function (props, propName, componentName) {
       // eslint-disable-next-line
       if (
@@ -415,6 +444,8 @@ DataTable.propTypes = {
         throw new Error("Please provide pageLength paginate Proprty");
       }
     },
-    type: PropTypes.string.isRequired,
+    type: PropTypes.string,
   }),
+  onPageChange: PropTypes.func.isRequired,
+  pageRangeDisplayed: PropTypes.number,
 };
