@@ -24,6 +24,7 @@ export default class DataTable extends React.Component {
       data: props.data,
       pagedData: props.data,
       sortby: null,
+      Startsorting: false,
       descending: null,
       search: false,
       pageLength: props.pagination.pageLength,
@@ -35,7 +36,6 @@ export default class DataTable extends React.Component {
     this.width = props.width || "100%";
 
     // Add pagination support
-    console.log("this.props.pagination", this.props.pagination);
     this.pagination = (!isEmpty(this.props.pagination) &&
       this.props.pagination) || { enabled: true };
   }
@@ -176,16 +176,13 @@ export default class DataTable extends React.Component {
       return sortVal;
     });
 
-    this.setState(
-      {
-        data,
-        sortby: colIndex,
-        descending,
-      },
-      () => {
-        this.onGotoPage(this.state.currentPage);
-      }
-    );
+    console.log("data", data);
+    this.setState({
+      data,
+      sortby: colIndex,
+      Startsorting: true,
+      descending,
+    });
   };
 
   onSearch = (e) => {
@@ -319,16 +316,6 @@ export default class DataTable extends React.Component {
     );
   };
 
-  getPagedData = (pageNo, pageLength) => {
-    let startOfRecord = (pageNo - 1) * pageLength;
-    let endOfRecord = startOfRecord + pageLength;
-
-    let data = this.state.data;
-    let pagedData = data.slice(startOfRecord, endOfRecord);
-
-    return pagedData;
-  };
-
   onPageLengthChange = (pageLength) => {
     this.setState(
       {
@@ -342,52 +329,33 @@ export default class DataTable extends React.Component {
 
   onGotoPage = (pageNo) => {
     console.log("pageNo", pageNo);
-    let pagedData = this.getPagedData(pageNo, this.props.pagination.pageLength);
     this.setState(
       {
-        pagedData: pagedData,
         currentPage: pageNo,
       },
       () => this.props.onPageChange(pageNo)
     );
   };
 
-  componentDidMount() {
-    // if (this.pagination.enabled) {
-    //   this.onGotoPage(this.state.currentPage);
-    // }
-  }
-
-  //todo:
-  static getDerivedStateFromProps(nextProps, prevState) {
+  static getDerivedStateFromProps = (nextProps, prevState) => {
     // eslint-disable-next-line
-    if (!isEqual(nextProps.data, prevState.data)) {
+    if (!isEqual(nextProps.data, prevState.data) && !prevState.Startsorting) {
+      console.log("here", nextProps.data);
       return {
         headers: nextProps.headers,
         data: nextProps.data,
         sortby: prevState.sortby,
         descending: prevState.descending,
         search: prevState.search,
-        //currentPage: 1,
         pagedData: nextProps.data,
       };
-      // eslint-disable-next-line
-    } else if (nextProps.currentPage != prevState.currentPage) {
-      console.log("here", nextProps.currentPage);
-      return {
-        currentPage: nextProps.currentPage,
-      };
     }
-    return null;
-  }
-  handlePageChange(pageNumber) {
-    console.log(`active page is ${pageNumber}`);
-    //this.setState({activePage: pageNumber});
-  }
+    return {
+      Startsorting: false,
+    };
+  };
 
   render() {
-    //console.log("props.pagination", this.props);
-    console.log("this.pagination.enabled", this.pagination.enabled);
     console.log("this.state.currentPage", this.state.currentPage);
     return (
       <div className={this.props.className}>
