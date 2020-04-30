@@ -60,7 +60,7 @@ class App extends Component {
       last_page_url: null,
       next_page_url: null,
       per_page: 5,
-      totalRecords: null,
+      totalRecords: 5,
       from: null,
       to: null,
     };
