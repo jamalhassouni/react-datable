@@ -37,30 +37,6 @@ export default class DataTable extends React.Component {
     this.pagination = this.props.pagination || {};
   }
 
-  onDragOver = (e) => {
-    e.preventDefault();
-  };
-
-  onDragStart = (e, source) => {
-    e.dataTransfer.setData("text/plain", source);
-  };
-
-  onDrop = (e, target) => {
-    e.preventDefault();
-    let source = e.dataTransfer.getData("text/plain");
-    let headers = [...this.state.headers];
-    let srcHeader = headers[source];
-    let targetHeader = headers[target];
-
-    let temp = srcHeader.index;
-    srcHeader.index = targetHeader.index;
-    targetHeader.index = temp;
-
-    this.setState({
-      headers,
-    });
-  };
-
   renderTableHeader = () => {
     let { headers } = this.state;
     headers.sort((a, b) => {
@@ -83,11 +59,6 @@ export default class DataTable extends React.Component {
           ref={(th) => (this[cleanTitle] = th)}
           style={{ width: width }}
           data-col={cleanTitle}
-          onDragStart={(e) => this.onDragStart(e, index)}
-          onDragOver={this.onDragOver}
-          onDrop={(e) => {
-            this.onDrop(e, index);
-          }}
         >
           <span draggable data-col={cleanTitle} className="header-cell">
             {title}
@@ -436,7 +407,9 @@ DataTable.propTypes = {
     pageLength: function (props, propName, componentName) {
       // eslint-disable-next-line
       if (
+        // eslint-disable-next-line
         props["enabled"] == true &&
+        // eslint-disable-next-line
         (props[propName] == undefined || typeof props[propName] != "number")
       ) {
         throw new Error("Please provide pageLength paginate Proprty");
