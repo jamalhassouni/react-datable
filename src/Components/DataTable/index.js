@@ -106,7 +106,7 @@ export default class DataTable extends React.Component {
 
   renderContent = () => {
     let { headers } = this.state;
-    let data = this.pagination ? this.state.pagedData : this.state.data;
+    let data = this.state.data;
 
     let contentView = data.map((row, rowIdx) => {
       let id = row[this.keyField];
@@ -351,7 +351,7 @@ export default class DataTable extends React.Component {
       };
     }
     return {
-      Startsorting: false,
+      Startsorting: false
     };
   };
 
