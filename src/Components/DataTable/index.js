@@ -49,7 +49,7 @@ export default class DataTable extends React.Component {
 
     let headerView = headers.map((header, index) => {
       let title = header.title;
-      let cleanTitle = header.accessor;
+      let cleanTitle = typeof header.accessor === 'function' ? header.title : header.accessor;
       let width = header.width;
 
       if (this.state.sortby === index) {
@@ -63,8 +63,9 @@ export default class DataTable extends React.Component {
           ref={(th) => (this[cleanTitle] = th)}
           style={{ width: width }}
           data-col={cleanTitle}
+          data-index={index}
         >
-          <span draggable data-col={cleanTitle} className="header-cell">
+          <span draggable data-col={cleanTitle} data-index={index} className="header-cell">
             {title}
           </span>
         </th>
@@ -114,7 +115,12 @@ export default class DataTable extends React.Component {
       let edit = this.state.edit;
 
       let tds = headers.map((header, index) => {
-        let content = row[header.accessor];
+        let content = ""
+        if(typeof header.accessor === "function") {
+          content = header.accessor(row);
+        } else {
+          content = row[header.accessor];
+        }
         let cell = header.cell;
         if (cell) {
           if (typeof cell === "object") {
@@ -159,28 +165,43 @@ export default class DataTable extends React.Component {
 
   onSort = (e) => {
     let data = this.state.data.slice(); // Give new array
-    let colIndex = ReactDOM.findDOMNode(e.target).parentNode.cellIndex;
-    let colTitle = e.target.dataset.col;
+    let colIndex = Number(ReactDOM.findDOMNode(e.target).dataset.index);
+    // let colIndex = ReactDOM.findDOMNode(e.target).cellIndex || ReactDOM.findDOMNode(e.target).parentNode.cellIndex;
+    // let colTitle = e.target.dataset.col;
+    let colAccessor = this.state.headers[colIndex].accessor;
 
     let descending = !this.state.descending;
 
     data.sort((a, b) => {
       let sortVal = 0;
-      let aValue, bValue;
-      if(colTitle.includes('.')){
-        let splitedColTitle = colTitle.split('.');
-        splitedColTitle.forEach((title, index) => {
-          if(index === 0) {
-            aValue = a[title];
-            bValue = b[title];
-          } else {
-            aValue = aValue[title];
-            bValue = bValue[title];
-          }
-        });
+      let aValue = "", bValue = "";
+      if(typeof colAccessor === "function") {
+        aValue = colAccessor(a);
+        bValue = colAccessor(b);
+        if(typeof aValue === "object") {
+          var aDiv = document.createElement('div');
+          var bDiv = document.createElement('div');
+          ReactDOM.render( aValue, aDiv );
+          ReactDOM.render( bValue, bDiv );
+          aValue = aDiv.innerText;
+          bValue = bDiv.innerText;
+        }
       } else {
-        aValue = a[colTitle];
-        bValue = b[colTitle];
+        if(colAccessor.includes('.')){
+          let splitedcolAccessor = colAccessor.split('.');
+          splitedcolAccessor.forEach((title, index) => {
+            if(index === 0) {
+              aValue = a[title];
+              bValue = b[title];
+            } else {
+              aValue = aValue[title];
+              bValue = bValue[title];
+            }
+          });
+        } else {
+          aValue = a[colAccessor];
+          bValue = b[colAccessor];
+        }
       }
       aValue = typeof aValue === "string" ? aValue.toLowerCase() : aValue;
       bValue = typeof bValue === "string" ? bValue.toLowerCase() : bValue;

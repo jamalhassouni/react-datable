@@ -27,7 +27,9 @@ class App extends Component {
         },
         {
           title: "username",
-          accessor: "username",
+          // accessor: "username",
+          accessor: d => <i>{d.username}</i>,
+          width: "300px",
           index: 5,
           dataType: "string",
         },
