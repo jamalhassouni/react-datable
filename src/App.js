@@ -33,7 +33,7 @@ class App extends Component {
         },
         {
           title: "Rating",
-          accessor: "rating",
+          accessor: "doctor.avg_rate",
           index: 6,
           width: "200px",
           cell: (row) => {

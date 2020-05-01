@@ -166,9 +166,24 @@ export default class DataTable extends React.Component {
 
     data.sort((a, b) => {
       let sortVal = 0;
-      const aValue = typeof a[colTitle] === "string" ? a[colTitle].toLowerCase() : a[colTitle];
-      const bValue = typeof b[colTitle] === "string" ? b[colTitle].toLowerCase() : b[colTitle];
-      console.log(a[colTitle], colTitle);
+      let aValue, bValue;
+      if(colTitle.includes('.')){
+        let splitedColTitle = colTitle.split('.');
+        splitedColTitle.forEach((title, index) => {
+          if(index === 0) {
+            aValue = a[title];
+            bValue = b[title];
+          } else {
+            aValue = aValue[title];
+            bValue = bValue[title];
+          }
+        });
+      } else {
+        aValue = a[colTitle];
+        bValue = b[colTitle];
+      }
+      aValue = typeof aValue === "string" ? aValue.toLowerCase() : aValue;
+      bValue = typeof bValue === "string" ? bValue.toLowerCase() : bValue;
       if (aValue < bValue) {
         sortVal = -1;
       } else if (aValue > bValue) {
