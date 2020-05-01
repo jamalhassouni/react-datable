@@ -1,3 +1,5 @@
+import { Children, isValidElement } from "react";
+
 /**
  *  Check if object empty
  * @param {Object} obj
@@ -49,4 +51,56 @@ export const isEmpty = (value) => {
     return false;
   }
   return true;
+};
+/**
+ * Returns true if the element has children, otherwise returns false.
+ * @param {} element The children array from the element where is used.
+ */
+export const hasChildren = (element) =>
+  isValidElement(element) && Boolean(element.props.children);
+
+/**
+ *  convert child to string
+ *
+ */
+export const childToString = (child) => {
+  if (
+    typeof child === "undefined" ||
+    child === null ||
+    typeof child === "boolean"
+  ) {
+    return "";
+  }
+  if (JSON.stringify(child) === "{}") {
+    return "";
+  }
+  return child.toString();
+};
+
+/***
+ *
+ * Strips all html and returns only text nodes
+ * @param   {children} children the children array from the element where is used.
+ * @returns  A string composed by all text nodes in the provided tree.
+ */
+export const onlyText = (children) => {
+  if (!(children instanceof Array) && !isValidElement(children)) {
+    return childToString(children);
+  }
+  return Children.toArray(children).reduce((text, child) => {
+    let newText = "";
+    if (isValidElement(child) && hasChildren(child)) {
+      newText = onlyText(child.props.children);
+    } else {
+      newText = childToString(child);
+    }
+    return text.concat(newText);
+  }, "");
+};
+let Utils;
+export default Utils = {
+  ...Children,
+  onlyText,
+  hasChildren,
+  childToString,
 };
