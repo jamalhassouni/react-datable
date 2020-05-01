@@ -73,11 +73,15 @@ class App extends Component {
     };
   }
 
+  //TODO: fix update for custom accessor
   onUpdateTable = (field, id, value) => {
+    console.log(field, id, value);
     let data = this.state.data.slice();
     let updateRow = this.state.data.find((d) => {
       return d["id"] === id;
     });
+
+    console.log("updateRow", updateRow);
 
     updateRow[field] = value;
 

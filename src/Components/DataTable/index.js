@@ -40,6 +40,9 @@ export default class DataTable extends React.Component {
       this.props.pagination) || { enabled: true };
   }
 
+  /**
+   * Render Table Header
+   */
   renderTableHeader = () => {
     let { headers } = this.state;
     headers.sort((a, b) => {
@@ -81,6 +84,9 @@ export default class DataTable extends React.Component {
     return headerView;
   };
 
+  /**
+   * Render No Data Found
+   */
   renderNoData = () => {
     return (
       <tr>
@@ -89,6 +95,9 @@ export default class DataTable extends React.Component {
     );
   };
 
+  /**
+   * on Update table Content
+   */
   onUpdate = (e) => {
     e.preventDefault();
     let input = e.target.firstChild;
@@ -100,9 +109,11 @@ export default class DataTable extends React.Component {
     });
 
     this.props.onUpdate &&
-      this.props.onUpdate(header.accessor, rowId, input.value);
+      this.props.onUpdate(header.accessor, Number(rowId), input.value);
   };
-
+  /**
+   * Handle Form Reset
+   */
   onFormReset = (e) => {
     if (e.keyCode === 27) {
       // ESC key
@@ -112,6 +123,9 @@ export default class DataTable extends React.Component {
     }
   };
 
+  /**
+   * Render Table Content
+   */
   renderContent = () => {
     let { headers } = this.state;
     let data = this.state.data;
@@ -169,6 +183,9 @@ export default class DataTable extends React.Component {
     return contentView;
   };
 
+  /**
+   * Handle Sort Data
+   */
   onSort = (e) => {
     let data = this.state.data.slice(); // Give new array
     let colIndex = Number(ReactDOM.findDOMNode(e.target).dataset.index);
