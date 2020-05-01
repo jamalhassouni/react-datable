@@ -53,7 +53,8 @@ export default class DataTable extends React.Component {
       let width = header.width;
 
       if (this.state.sortby === index) {
-        title += this.state.descending ? "\u2191" : "\u2193";
+        // title += this.state.descending ? "\u2193" : "\u2191";
+        title += this.state.descending ? "  ▾" : "  ▴";
       }
 
       return (
@@ -167,6 +168,7 @@ export default class DataTable extends React.Component {
       let sortVal = 0;
       const aValue = typeof a[colTitle] === "string" ? a[colTitle].toLowerCase() : a[colTitle];
       const bValue = typeof b[colTitle] === "string" ? b[colTitle].toLowerCase() : b[colTitle];
+      console.log(a[colTitle], colTitle);
       if (aValue < bValue) {
         sortVal = -1;
       } else if (aValue > bValue) {
