@@ -28,7 +28,12 @@ class App extends Component {
         {
           title: "username",
           // accessor: "username",
-          accessor: d => <i>{d.username}</i>,
+          accessor: (d) => (
+            <span>
+              name <i>{d.username}</i>
+              <a href="#"> link</a>
+            </span>
+          ),
           width: "300px",
           index: 5,
           dataType: "string",
