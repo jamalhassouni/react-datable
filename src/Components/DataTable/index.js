@@ -3,7 +3,7 @@ import ReactDOM from "react-dom";
 import "./datatable.css";
 import Pagination from "../Pagination";
 import PropTypes from "prop-types";
-import { isEmpty } from "../../utils";
+import Utils, { isEmpty } from "../../utils";
 const isEqual = require("react-fast-compare");
 
 export default class DataTable extends React.Component {
@@ -49,7 +49,8 @@ export default class DataTable extends React.Component {
 
     let headerView = headers.map((header, index) => {
       let title = header.title;
-      let cleanTitle = typeof header.accessor === 'function' ? header.title : header.accessor;
+      let cleanTitle =
+        typeof header.accessor === "function" ? header.title : header.accessor;
       let width = header.width;
 
       if (this.state.sortby === index) {
@@ -65,7 +66,12 @@ export default class DataTable extends React.Component {
           data-col={cleanTitle}
           data-index={index}
         >
-          <span draggable data-col={cleanTitle} data-index={index} className="header-cell">
+          <span
+            draggable
+            data-col={cleanTitle}
+            data-index={index}
+            className="header-cell"
+          >
             {title}
           </span>
         </th>
@@ -115,8 +121,8 @@ export default class DataTable extends React.Component {
       let edit = this.state.edit;
 
       let tds = headers.map((header, index) => {
-        let content = ""
-        if(typeof header.accessor === "function") {
+        let content = "";
+        if (typeof header.accessor === "function") {
           content = header.accessor(row);
         } else {
           content = row[header.accessor];
@@ -174,23 +180,20 @@ export default class DataTable extends React.Component {
 
     data.sort((a, b) => {
       let sortVal = 0;
-      let aValue = "", bValue = "";
-      if(typeof colAccessor === "function") {
+      let aValue = "",
+        bValue = "";
+      if (typeof colAccessor === "function") {
         aValue = colAccessor(a);
         bValue = colAccessor(b);
-        if(typeof aValue === "object") {
-          var aDiv = document.createElement('div');
-          var bDiv = document.createElement('div');
-          ReactDOM.render( aValue, aDiv );
-          ReactDOM.render( bValue, bDiv );
-          aValue = aDiv.innerText;
-          bValue = bDiv.innerText;
+        if (typeof aValue === "object") {
+          aValue = Utils.onlyText(aValue.props.children);
+          bValue = Utils.onlyText(bValue.props.children);
         }
       } else {
-        if(colAccessor.includes('.')){
-          let splitedcolAccessor = colAccessor.split('.');
+        if (colAccessor.includes(".")) {
+          let splitedcolAccessor = colAccessor.split(".");
           splitedcolAccessor.forEach((title, index) => {
-            if(index === 0) {
+            if (index === 0) {
               aValue = a[title];
               bValue = b[title];
             } else {
@@ -391,7 +394,7 @@ export default class DataTable extends React.Component {
       };
     }
     return {
-      Startsorting: false
+      Startsorting: false,
     };
   };
 
