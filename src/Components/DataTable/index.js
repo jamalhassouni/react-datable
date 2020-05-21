@@ -65,7 +65,7 @@ export default class DataTable extends React.Component {
         <th
           key={cleanTitle}
           ref={(th) => (this[cleanTitle] = th)}
-          style={{ width: width }}
+          style={{ width: width + "px" }}
           data-col={cleanTitle}
           data-index={index}
         >
@@ -139,7 +139,18 @@ export default class DataTable extends React.Component {
         if (typeof header.accessor === "function") {
           content = header.accessor(row);
         } else {
-          content = row[header.accessor];
+          if (header.accessor.includes(".")) {
+            let splitedcolAccessor = header.accessor.split(".");
+            splitedcolAccessor.forEach((title, index) => {
+              if (index === 0) {
+                content = row[title];
+              } else {
+                content = content[title];
+              }
+            });
+          } else {
+            content = row[header.accessor];
+          }
         }
         let cell = header.cell;
         if (cell) {
@@ -189,8 +200,6 @@ export default class DataTable extends React.Component {
   onSort = (e) => {
     let data = this.state.data.slice(); // Give new array
     let colIndex = Number(ReactDOM.findDOMNode(e.target).dataset.index);
-    // let colIndex = ReactDOM.findDOMNode(e.target).cellIndex || ReactDOM.findDOMNode(e.target).parentNode.cellIndex;
-    // let colTitle = e.target.dataset.col;
     let colAccessor = this.state.headers[colIndex].accessor;
 
     let descending = !this.state.descending;
@@ -202,7 +211,7 @@ export default class DataTable extends React.Component {
       if (typeof colAccessor === "function") {
         aValue = colAccessor(a);
         bValue = colAccessor(b);
-        if (typeof aValue === "object") {
+        if (!isEmpty(aValue) && typeof aValue === "object") {
           aValue = Utils.onlyText(aValue.props.children);
           bValue = Utils.onlyText(bValue.props.children);
         }
@@ -249,37 +258,52 @@ export default class DataTable extends React.Component {
     let { headers } = this.state;
     // Grab the index of the target column
     let idx = e.target.dataset.idx;
+    let fieldName = "";
+    let fieldValue = "";
 
     // Get the target column
-    let targetCol = this.state.headers[idx].accessor;
+    fieldName = headers[idx].accessor;
 
     let data = this._preSearchData;
 
     // Filter the records
     let searchData = this._preSearchData.filter((row) => {
-      let show = true;
-
-      for (let i = 0; i < headers.length; i++) {
-        let fieldName = headers[i].accessor;
-        let fieldValue = row[fieldName];
-        let inputId = "inp" + fieldName;
-        let input = this[inputId];
-        if (!fieldValue === "") {
-          show = true;
+      if (typeof fieldName === "function") {
+        fieldValue = fieldName(row);
+        if (!isEmpty(fieldValue) && typeof fieldValue === "object") {
+          fieldValue = Utils.onlyText(fieldValue.props.children);
+        }
+      } else {
+        if (fieldName.includes(".")) {
+          let splitedcolAccessor = fieldName.split(".");
+          splitedcolAccessor.forEach((title, index) => {
+            if (index === 0) {
+              fieldValue = row[title];
+            } else {
+              fieldValue = fieldValue[title];
+            }
+          });
         } else {
-          show =
-            fieldValue
-              .toString()
-              .toLowerCase()
-              .indexOf(input.value.toLowerCase()) > -1;
-          if (!show) break;
+          fieldValue = row[fieldName];
         }
       }
-      return show;
-      //return row[targetCol].toString().toLowerCase().indexOf(needle) > -1;
+      let inputId = "inp" + fieldName;
+      let input = this[inputId];
+      if (isEmpty(input.value)) {
+        return true;
+      }
+
+      if (!isEmpty(fieldValue) || (isEmpty(fieldValue) && fieldValue == 0)) {
+        return (
+          fieldValue
+            .toString()
+            .toLowerCase()
+            .indexOf(input.value.toString().toLowerCase()) !== -1
+        );
+      }
     });
 
-    // UPdate the state
+    //UPdate the state
     this.setState(
       {
         data: searchData,
@@ -288,7 +312,7 @@ export default class DataTable extends React.Component {
       },
       () => {
         if (this.pagination.enabled) {
-          this.onGotoPage(1);
+          //this.onGotoPage(1);
         }
       }
     );
@@ -303,6 +327,7 @@ export default class DataTable extends React.Component {
     let searchInputs = headers.map((header, idx) => {
       // Get the header ref.
       let hdr = this[header.accessor];
+      //console.log("hdr", hdr);
       let inputId = "inp" + header.accessor;
 
       return (
@@ -311,7 +336,8 @@ export default class DataTable extends React.Component {
             type="text"
             ref={(input) => (this[inputId] = input)}
             style={{
-              width: hdr.clientWidth - 17 + "px",
+              //width: hdr && hdr.clientWidth - 17 + "px",
+              width: header.width - 17 + "px",
             }}
             data-idx={idx}
           />
@@ -388,10 +414,13 @@ export default class DataTable extends React.Component {
   };
 
   onGotoPage = (pageNo) => {
-    console.log("pageNo", pageNo);
+    //console.log("pageNo", pageNo);
     this.setState(
       {
         currentPage: pageNo,
+        search: false,
+        Startsorting: false,
+        sortby: null,
       },
       () => this.props.onPageChange(pageNo)
     );
@@ -399,14 +428,17 @@ export default class DataTable extends React.Component {
 
   static getDerivedStateFromProps = (nextProps, prevState) => {
     // eslint-disable-next-line
-    if (!isEqual(nextProps.data, prevState.data) && !prevState.Startsorting) {
-      console.log("here", nextProps.data);
+    if (
+      !isEqual(nextProps.data, prevState.data) &&
+      !prevState.Startsorting &&
+      !prevState.search
+    ) {
       return {
         headers: nextProps.headers,
         data: nextProps.data,
         sortby: prevState.sortby,
         descending: prevState.descending,
-        search: prevState.search,
+        //search: prevState.search,
         pagedData: nextProps.data,
       };
     }
@@ -416,7 +448,7 @@ export default class DataTable extends React.Component {
   };
 
   render() {
-    console.log("this.state.currentPage", this.state.currentPage);
+    //console.log("this.state.currentPage", this.state.currentPage);
     return (
       <div className={this.props.className}>
         {this.pagination.enabled && (

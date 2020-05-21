@@ -14,16 +14,17 @@ class App extends Component {
         {
           title: "First Name",
           accessor: "first_name",
-          width: "300px",
+          width: "200",
           index: 2,
           dataType: "string",
         },
         {
           title: "Last Name",
-          accessor: "last_name",
-          width: "300px",
+          //accessor: "last_name",
+          accessor: (d) => d.last_name,
+          width: "300",
           index: 3,
-          dataType: "string",
+          dataType: "function",
         },
         {
           title: "username",
@@ -34,15 +35,22 @@ class App extends Component {
               <a href="#"> link</a>
             </span>
           ),
-          width: "300px",
+          width: "300",
           index: 5,
-          dataType: "string",
+          dataType: "function",
+        },
+        {
+          title: "rate",
+          accessor: "doctor.average",
+
+          width: "300",
+          index: 6,
         },
         {
           title: "Rating",
           accessor: "doctor.avg_rate",
-          index: 6,
-          width: "200px",
+          index: 7,
+          width: "200",
           cell: (row) => {
             return (
               <div className="rating">
@@ -142,7 +150,7 @@ class App extends Component {
    * Handle Page Change
    */
   handlePageChange = async (pageNumber) => {
-    console.log("handlePageChange", pageNumber);
+    //console.log("handlePageChange", pageNumber);
     let res = await this.search(pageNumber);
     this.setState({
       data: res.data,
