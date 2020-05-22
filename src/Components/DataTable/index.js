@@ -11,6 +11,7 @@ export default class DataTable extends React.Component {
   static defaultProps = {
     currentPage: 1,
     totalRecords: 5,
+    searchable: true,
     pagination: {
       enabled: true,
       pageLength: 5,
@@ -23,6 +24,7 @@ export default class DataTable extends React.Component {
       headers: props.headers,
       data: props.data,
       pagedData: props.data,
+      _preSearchData: props.data,
       sortby: null,
       Startsorting: false,
       descending: null,
@@ -254,12 +256,16 @@ export default class DataTable extends React.Component {
     });
   };
 
+  /**
+   * Handle Search
+   */
   onSearch = (e) => {
     let { headers } = this.state;
     // Grab the index of the target column
     let idx = e.target.dataset.idx;
-    let fieldName = "";
-    let fieldValue = "";
+    let fieldName = "",
+      fieldValue = "",
+      inputId = "";
 
     // Get the target column
     fieldName = headers[idx].accessor;
@@ -267,12 +273,13 @@ export default class DataTable extends React.Component {
     let data = this._preSearchData;
 
     // Filter the records
-    let searchData = this._preSearchData.filter((row) => {
+    let searchData = this.state._preSearchData.filter((row) => {
       if (typeof fieldName === "function") {
         fieldValue = fieldName(row);
         if (!isEmpty(fieldValue) && typeof fieldValue === "object") {
           fieldValue = Utils.onlyText(fieldValue.props.children);
         }
+        inputId = "inp" + headers[idx].title.replace(/\s/g, "");
       } else {
         if (fieldName.includes(".")) {
           let splitedcolAccessor = fieldName.split(".");
@@ -286,14 +293,17 @@ export default class DataTable extends React.Component {
         } else {
           fieldValue = row[fieldName];
         }
+
+        inputId = "inp" + fieldName;
       }
-      let inputId = "inp" + fieldName;
       let input = this[inputId];
       if (isEmpty(input.value)) {
         return true;
       }
 
       if (!isEmpty(fieldValue) || (isEmpty(fieldValue) && fieldValue == 0)) {
+        console.log("fieldValue", fieldValue);
+        console.log("input.value", input.value);
         return (
           fieldValue
             .toString()
@@ -303,11 +313,14 @@ export default class DataTable extends React.Component {
       }
     });
 
+    console.log("searchData", searchData);
+
     //UPdate the state
     this.setState(
       {
         data: searchData,
         pagedData: searchData,
+        search: this.props.searchable,
         totalRecords: searchData.length,
       },
       () => {
@@ -318,17 +331,28 @@ export default class DataTable extends React.Component {
     );
   };
 
+  /**
+   * Render Search Inputs
+   */
   renderSearch = () => {
     let { search, headers } = this.state;
-    if (!search) {
-      return null;
+    let { searchable } = this.props;
+    if (!searchable) {
+      return <td key="emptytr1"></td>;
     }
 
     let searchInputs = headers.map((header, idx) => {
+      if (!header.searchable) {
+        return <td key={`emptytr${idx}`}></td>;
+      }
       // Get the header ref.
       let hdr = this[header.accessor];
-      //console.log("hdr", hdr);
-      let inputId = "inp" + header.accessor;
+      let inputId = "";
+      if (typeof header.accessor === "function") {
+        inputId = "inp" + header.title.replace(/\s/g, "");
+      } else {
+        inputId = "inp" + header.accessor;
+      }
 
       return (
         <td key={idx}>
@@ -359,46 +383,36 @@ export default class DataTable extends React.Component {
     });
   };
 
+  /**
+   * Render Table
+   */
   renderTable = () => {
     let title = this.props.title || "DataTable";
     let headerView = this.renderTableHeader();
     let contentView =
-      this.state.data.length > 0 ? this.renderContent() : this.renderNoData();
+      this.state.data && this.state.data.length > 0
+        ? this.renderContent()
+        : this.renderNoData();
 
     return (
       <table className="data-inner-table">
-        <caption className="data-table-caption">{title}</caption>
+        {/* <caption className="data-table-caption">{title}</caption> */}
         <thead onClick={this.onSort}>
           <tr>{headerView}</tr>
         </thead>
-        <tbody onDoubleClick={this.onShowEditor}>
+
+        {
+          //TODO: fix edit
+          /* <tbody onDoubleClick={this.onShowEditor} >
+          {this.renderSearch()}
+          {contentView}
+        </tbody> */
+        }
+        <tbody>
           {this.renderSearch()}
           {contentView}
         </tbody>
       </table>
-    );
-  };
-
-  onToggleSearch = (e) => {
-    if (this.state.search) {
-      this.setState({
-        data: this._preSearchData,
-        search: false,
-      });
-      this._preSearchData = null;
-    } else {
-      this._preSearchData = this.state.data;
-      this.setState({
-        search: true,
-      });
-    }
-  };
-
-  renderToolbar = () => {
-    return (
-      <div className="toolbar">
-        <button onClick={this.onToggleSearch}>Search</button>
-      </div>
     );
   };
 
@@ -414,7 +428,6 @@ export default class DataTable extends React.Component {
   };
 
   onGotoPage = (pageNo) => {
-    //console.log("pageNo", pageNo);
     this.setState(
       {
         currentPage: pageNo,
@@ -440,6 +453,7 @@ export default class DataTable extends React.Component {
         descending: prevState.descending,
         //search: prevState.search,
         pagedData: nextProps.data,
+        _preSearchData: nextProps.data,
       };
     }
     return {
@@ -448,7 +462,6 @@ export default class DataTable extends React.Component {
   };
 
   render() {
-    //console.log("this.state.currentPage", this.state.currentPage);
     return (
       <div className={this.props.className}>
         {this.pagination.enabled && (
@@ -464,6 +477,7 @@ export default class DataTable extends React.Component {
             totalItemsCount={this.props.totalRecords}
             onChange={this.onGotoPage.bind(this)}
             pageRangeDisplayed={5}
+            position={"left"}
             //itemClass="item"
             //innerClass=""
             //activeClass="active"
@@ -471,22 +485,32 @@ export default class DataTable extends React.Component {
             //disabledClass="disabled item"
           />
         )}
-        {this.renderToolbar()}
         {this.renderTable()}
+        {this.pagination.enabled && (
+          <Pagination
+            // type={this.props.pagination.type}
+            //totalRecords={this.props.totalRecords}
+            //pageLength={this.props.pagination.pageLength}
+            //onPageLengthChange={this.onPageLengthChange}
+            //onGotoPage={this.onGotoPage}
+            //currentPage={this.state.currentPage}
+            activePage={this.state.currentPage}
+            itemsCountPerPage={this.props.pagination.pageLength}
+            totalItemsCount={this.props.totalRecords}
+            onChange={this.onGotoPage.bind(this)}
+            pageRangeDisplayed={5}
+            position={"right"}
+            //itemClass="item"
+            //innerClass=""
+            //activeClass="active"
+            //activeLinkClass="active"
+            //disabledClass="disabled item"
+          />
+        )}
       </div>
     );
   }
 }
-
-// DataTable.defaultProps = {
-//   currentPage: 1,
-//   totalRecords: 5,
-//   pagination: {
-//     enabled: true,
-//     pageLength: 5,
-//     type: "long", // long, short
-//   },
-// };
 
 DataTable.propTypes = {
   currentPage: PropTypes.number.isRequired,
