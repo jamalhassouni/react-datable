@@ -13,6 +13,7 @@ export default class DataTable extends React.Component {
     totalRecords: 5,
     searchable: true,
     pagination: {
+      position: ["bottom left", "top left"],
       enabled: true,
       pageLength: 5,
       type: "long", // long, short
@@ -39,7 +40,7 @@ export default class DataTable extends React.Component {
 
     // Add pagination support
     this.pagination = (!isEmpty(this.props.pagination) &&
-      this.props.pagination) || { enabled: true };
+      this.props.pagination) || DataTable.defaultProps.pagination;//{ enabled: true };
   }
 
   /**
@@ -464,7 +465,7 @@ export default class DataTable extends React.Component {
   render() {
     return (
       <div className={this.props.className}>
-        {this.pagination.enabled && (
+        {this.pagination.enabled && this.pagination.position.join(', ').includes('top') && (
           <Pagination
             // type={this.props.pagination.type}
             //totalRecords={this.props.totalRecords}
@@ -477,7 +478,7 @@ export default class DataTable extends React.Component {
             totalItemsCount={this.props.totalRecords}
             onChange={this.onGotoPage.bind(this)}
             pageRangeDisplayed={5}
-            position={"left"}
+            position={this.pagination.position[0].includes('top') ? this.pagination.position[0] :this.pagination.position[1] }
             //itemClass="item"
             //innerClass=""
             //activeClass="active"
@@ -486,7 +487,7 @@ export default class DataTable extends React.Component {
           />
         )}
         {this.renderTable()}
-        {this.pagination.enabled && (
+        {this.pagination.enabled && this.pagination.position.join(', ').includes('bottom') && (
           <Pagination
             // type={this.props.pagination.type}
             //totalRecords={this.props.totalRecords}
@@ -499,7 +500,7 @@ export default class DataTable extends React.Component {
             totalItemsCount={this.props.totalRecords}
             onChange={this.onGotoPage.bind(this)}
             pageRangeDisplayed={5}
-            position={"right"}
+            position={this.pagination.position[0].includes('bottom') ? this.pagination.position[0] :this.pagination.position[1] }
             //itemClass="item"
             //innerClass=""
             //activeClass="active"
@@ -526,6 +527,17 @@ DataTable.propTypes = {
         (props[propName] == undefined || typeof props[propName] != "number")
       ) {
         throw new Error("Please provide pageLength paginate Proprty");
+      }
+    },
+    position: function (props, propName, componentName) {
+      // eslint-disable-next-line
+      if (
+        // eslint-disable-next-line
+        props["enabled"] == true &&
+        // eslint-disable-next-line
+        (props[propName] == undefined || !Array.isArray(props[propName]))
+      ) {
+        throw new Error("Please provide paginate position Property with type array");
       }
     },
     type: PropTypes.string,

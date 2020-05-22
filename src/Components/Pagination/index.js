@@ -46,7 +46,7 @@ export default class Pagination extends React.Component {
     nextPageText: "⟩",
     lastPageText: "»",
     innerClass: "pagination",
-    position: "left",
+    position: "top left",
     itemClass: undefined,
     linkClass: undefined,
     activeLinkClass: undefined,
@@ -208,15 +208,15 @@ export default class Pagination extends React.Component {
 
   renderPostionStyle = (position) => {
     let style = {};
-    switch (position) {
-      case "left":
-        style = { justifyContent: "flex-start" };
-      case "right":
-        style = { justifyContent: "flex-end" };
-
+    switch (true) {
+      case position.includes("left"):
+        style = { justifyContent: "flex-start" };break;
+      case position.includes("right"):
+        style = { justifyContent: "flex-end" };break;
       default:
         break;
     }
+    console.log("style", style);
     return style;
   };
   render() {
