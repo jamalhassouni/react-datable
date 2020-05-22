@@ -16,11 +16,12 @@ class App extends Component {
           accessor: "first_name",
           width: "200",
           index: 2,
+          searchable: true,
           dataType: "string",
         },
         {
           title: "Last Name",
-          //accessor: "last_name",
+          searchable: true,
           accessor: (d) => d.last_name,
           width: "300",
           index: 3,
@@ -37,10 +38,12 @@ class App extends Component {
           ),
           width: "300",
           index: 5,
+          searchable: true,
           dataType: "function",
         },
         {
           title: "rate",
+          searchable: true,
           accessor: "doctor.average",
 
           width: "300",
@@ -49,6 +52,7 @@ class App extends Component {
         {
           title: "Rating",
           accessor: "doctor.avg_rate",
+          searchable: true,
           index: 7,
           width: "200",
           cell: (row) => {
@@ -181,6 +185,7 @@ class App extends Component {
           totalRecords={this.state.totalRecords}
           pageRangeDisplayed={5}
           onPageChange={this.handlePageChange}
+          //searchable
         />
       </div>
     );

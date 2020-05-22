@@ -10,6 +10,7 @@ export default class Pagination extends React.Component {
     totalItemsCount: PropTypes.number.isRequired,
     onChange: PropTypes.func.isRequired,
     activePage: PropTypes.number,
+    position: PropTypes.string,
     itemsCountPerPage: PropTypes.number,
     pageRangeDisplayed: PropTypes.number,
     prevPageText: PropTypes.oneOfType([PropTypes.string, PropTypes.element]),
@@ -45,6 +46,7 @@ export default class Pagination extends React.Component {
     nextPageText: "⟩",
     lastPageText: "»",
     innerClass: "pagination",
+    position: "left",
     itemClass: undefined,
     linkClass: undefined,
     activeLinkClass: undefined,
@@ -204,8 +206,29 @@ export default class Pagination extends React.Component {
     return pages;
   }
 
+  renderPostionStyle = (position) => {
+    let style = {};
+    switch (position) {
+      case "left":
+        style = { justifyContent: "flex-start" };
+      case "right":
+        style = { justifyContent: "flex-end" };
+
+      default:
+        break;
+    }
+    return style;
+  };
   render() {
     const pages = this.buildPages();
-    return <ul className={this.props.innerClass}>{pages}</ul>;
+    const { position } = this.props;
+    const positionStyle = this.renderPostionStyle(position);
+    console.log("position", position);
+    console.log("positionStyle", positionStyle);
+    return (
+      <ul style={{ ...positionStyle }} className={this.props.innerClass}>
+        {pages}
+      </ul>
+    );
   }
 }
