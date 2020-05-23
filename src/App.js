@@ -165,7 +165,8 @@ class App extends Component {
     // console.log("state per_page", this.state.per_page);
     const pagination = {
       enabled: true,
-      //pageLength: this.state.per_page,
+      pageLength: this.state.per_page,
+      position: ["bottom left"]
       //type: "long", // long, short
     };
     return (

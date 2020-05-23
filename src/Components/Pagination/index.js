@@ -216,15 +216,12 @@ export default class Pagination extends React.Component {
       default:
         break;
     }
-    console.log("style", style);
     return style;
   };
   render() {
     const pages = this.buildPages();
     const { position } = this.props;
     const positionStyle = this.renderPostionStyle(position);
-    console.log("position", position);
-    console.log("positionStyle", positionStyle);
     return (
       <ul style={{ ...positionStyle }} className={this.props.innerClass}>
         {pages}

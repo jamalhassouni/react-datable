@@ -248,7 +248,6 @@ export default class DataTable extends React.Component {
       return sortVal;
     });
 
-    console.log("data", data);
     this.setState({
       data,
       sortby: colIndex,
@@ -303,8 +302,6 @@ export default class DataTable extends React.Component {
       }
 
       if (!isEmpty(fieldValue) || (isEmpty(fieldValue) && fieldValue == 0)) {
-        console.log("fieldValue", fieldValue);
-        console.log("input.value", input.value);
         return (
           fieldValue
             .toString()
@@ -313,8 +310,6 @@ export default class DataTable extends React.Component {
         );
       }
     });
-
-    console.log("searchData", searchData);
 
     //UPdate the state
     this.setState(
@@ -526,6 +521,13 @@ DataTable.propTypes = {
         // eslint-disable-next-line
         (props[propName] == undefined || typeof props[propName] != "number")
       ) {
+        const error = console.error;
+        console.error = function(warning, ...args) {
+          if (/Please provide pageLength paginate Proprty/.test(warning)) {
+            throw new Error(warning);
+          }
+          error.apply(console, [warning, ...args]);
+        };
         throw new Error("Please provide pageLength paginate Proprty");
       }
     },
@@ -537,6 +539,13 @@ DataTable.propTypes = {
         // eslint-disable-next-line
         (props[propName] == undefined || !Array.isArray(props[propName]))
       ) {
+        const error = console.error;
+        console.error = function(warning, ...args) {
+          if (/Please provide paginate position Property with type array/.test(warning)) {
+            throw new Error(warning);
+          }
+          error.apply(console, [warning, ...args]);
+        };
         throw new Error("Please provide paginate position Property with type array");
       }
     },
