@@ -1,29 +1,29 @@
-# Laravel-react-datatable
+# react-datable
 
-Laravel-react-datatable is a lightweight, fast and extendable datagrid built for React
+react-datable is a lightweight, fast and extendable datagrid built for React
 
 <p align="center">
-<img alt="GitHub package.json version" src="https://img.shields.io/github/package-json/v/jamalhassouni/laravel-react-datatable?style=for-the-badge">
-<img alt="GitHub" src="https://img.shields.io/github/license/jamalhassouni/laravel-react-datatable?style=for-the-badge">
-<img alt="GitHub repo size" src="https://img.shields.io/github/repo-size/jamalhassouni/laravel-react-datatable?style=for-the-badge">
+<img alt="GitHub package.json version" src="https://img.shields.io/github/package-json/v/jamalhassouni/react-datable?style=for-the-badge">
+<img alt="GitHub" src="https://img.shields.io/github/license/jamalhassouni/react-datable?style=for-the-badge">
+<img alt="GitHub repo size" src="https://img.shields.io/github/repo-size/jamalhassouni/react-datable?style=for-the-badge">
 
  <img alt="PRs" src="https://img.shields.io/badge/PRs-Welcome-blue?style=for-the-badge" />
 <img alt="lang" src="https://img.shields.io/badge/lang-javascript-yellow?style=for-the-badge" />
-<img alt="GitHub issues" src="https://img.shields.io/github/issues/jamalhassouni/laravel-react-datatable?style=for-the-badge">
+<img alt="GitHub issues" src="https://img.shields.io/github/issues/jamalhassouni/react-datable?style=for-the-badge">
 </p>
 
 <div align="center">
-  <sub>Created by <a href="https://github.com/jamalhassouni">Jamal Hassouni</a> and maintained with ❤️ by an amazing <a href="https://github.com/jamalhassouni/laravel-react-datatable/graphs/contributors">team of developers</a>.</sub>
+  <sub>Created by <a href="https://github.com/jamalhassouni">Jamal Hassouni</a> and maintained with ❤️ by an amazing <a href="https://github.com/jamalhassouni/react-datable/graphs/contributors">team of developers</a>.</sub>
 </div>
 
 ## Table of Contents
 
-- [What is Laravel-react-datatable ?](#Laravel-react-datatable)
+- [What is react-datable ?](#react-datable)
 - [Table of Contents](#Table-of-Contents)
 - [Features](#Features)
 - [Screenshot](#demo)
 - [Installation](#Installation)
-- [Laravel-react-datatable Props](#LaraTable-Props)
+- [react-datable Props](#LaraTable-Props)
 - [Headers Props](#LaraTable-Headers-Props)
 - [Accessors](#Accessors)
 - [Custom Cell And Header](#Custom-Cell-And-Title-Rendering)
@@ -44,26 +44,26 @@ Laravel-react-datatable is a lightweight, fast and extendable datagrid built for
 
 ## demo
 
-![Demo Laravel-react-datatable](demo/demo.gif)
+![Demo react-datable](demo/demo.gif)
 
 ### Basic
 
-![Demo Laravel-react-datatable](demo/demo-simple.png)
+![Demo react-datable](demo/demo-simple.png)
 
 ### Custom cell
 
-![Demo Laravel-react-datatable](demo/demo-custom-cell.png)
+![Demo react-datable](demo/demo-custom-cell.png)
 
 ### Custom Headers and accessor
 
-![Demo Laravel-react-datatable](demo/demo-custom-header-cell.png)
+![Demo react-datable](demo/demo-custom-header-cell.png)
 
 ## Installation
 
 ---
 
 ```
-npm i laravel-react-datatable
+npm i react-datable
 ```
 
 ## usage
@@ -71,7 +71,7 @@ npm i laravel-react-datatable
 ```js
 import React from "react";
 import "./App.css";
-import LaraTable from "laravel-react-datatable";
+import LaraTable from "react-datable";
 
 class App extends Component {
   constructor(props) {
@@ -416,7 +416,7 @@ const headers = [
 
 ## Contributing
 
-The people who contribute to Laravel-react-datatable do so for the love of open source, our users and ecosystem, and most importantly, pushing the web forward together.Developers like you can help by contributing to rich and vibrant documentation, issuing pull requests to help us cover niche use cases, and to help sustain what you love about Laravel-react-datatable. Anybody can help by doing any of the following: use Laravel-react-datatable in projects,Contribute to the core repository.
+The people who contribute to react-datable do so for the love of open source, our users and ecosystem, and most importantly, pushing the web forward together.Developers like you can help by contributing to rich and vibrant documentation, issuing pull requests to help us cover niche use cases, and to help sustain what you love about react-datable. Anybody can help by doing any of the following: use react-datable in projects,Contribute to the core repository.
 
 All pull requests are welcome !
 
@@ -426,4 +426,4 @@ Please see [CHANGELOG](CHANGELOG.md) for more information what has changed recen
 
 ## License
 
-Laravel-react-datatable uses the MIT license. See [LICENSE](LICENSE.md) for more details.
+react-datable uses the MIT license. See [LICENSE](LICENSE.md) for more details.

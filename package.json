@@ -1,5 +1,5 @@
 {
-  "name": "laravel-react-datatable",
+  "name": "react-datable",
   "version": "0.1.0",
   "private": false,
   "babel": {
@@ -21,12 +21,12 @@
   "author": "Jamal Hassouni",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/jamalhassouni/laravel-react-datatable/issues"
+    "url": "https://github.com/jamalhassouni/react-datable/issues"
   },
-  "homepage": "https://github.com/jamalhassouni/laravel-react-datatable/",
+  "homepage": "https://github.com/jamalhassouni/react-datable/",
   "repository": {
     "type": "git",
-    "url": "https://github.com/jamalhassouni/laravel-react-datatable.git"
+    "url": "https://github.com/jamalhassouni/react-datable.git"
   },
   "dependencies": {
     "classnames": "^2.2.6",
