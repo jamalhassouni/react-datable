@@ -3,20 +3,20 @@ import ReactDOM from "react-dom";
 import "./datatable.css";
 import Pagination from "../Pagination";
 import PropTypes from "prop-types";
-import Utils, { isEmpty } from "../../utils";
+import Utils, { isEmpty } from "../utils";
+import cx from "classnames";
 const isEqual = require("react-fast-compare");
 
 export default class DataTable extends React.Component {
   _preSearchData = null;
   static defaultProps = {
-    currentPage: 1,
-    totalRecords: 5,
     searchable: true,
     pagination: {
-      position: ["bottom left", "top left"],
       enabled: true,
-      pageLength: 5,
-      type: "long", // long, short
+      position: ["bottom left", "top left"],
+      currentPage: 1,
+      itemsCountPerPage: 10,
+      pageRangeDisplayed: 5,
     },
   };
   constructor(props) {
@@ -30,8 +30,8 @@ export default class DataTable extends React.Component {
       Startsorting: false,
       descending: null,
       search: false,
-      pageLength: props.pagination.pageLength,
-      currentPage: 1,
+      itemsCountPerPage: props.pagination.itemsCountPerPage,
+      currentPage: props.pagination.currentPage,
     };
 
     this.keyField = props.keyField || "id"; // TODO: revisit this logic
@@ -39,10 +39,95 @@ export default class DataTable extends React.Component {
     this.width = props.width || "100%";
 
     // Add pagination support
-    this.pagination = (!isEmpty(this.props.pagination) &&
-      this.props.pagination) || DataTable.defaultProps.pagination;//{ enabled: true };
+    this.pagination =
+      (!isEmpty(this.props.pagination) && this.props.pagination) ||
+      DataTable.defaultProps.pagination; //{ enabled: true };
   }
 
+  /**
+   * Render Table Header Title
+   */
+  renderTableHeaderTitle = (
+    title,
+    cleanTitle,
+    index,
+    sortIcon = null,
+    style
+  ) => {
+    if (typeof title === "object") {
+      const icon = React.createElement(
+        "span",
+        {
+          "data-col": cleanTitle,
+          "data-index": index,
+          key: "icon",
+          style: {
+            cursor: "pointer",
+          },
+        },
+        sortIcon
+      );
+      const childrenWithProps = React.Children.map(
+        title.props.children,
+        (child, i) => {
+          if (typeof child === "object") {
+            return React.cloneElement(child, {
+              "data-col": cleanTitle,
+              "data-index": index,
+            });
+          } else {
+            return child;
+          }
+        }
+      );
+      const titleElement = React.cloneElement(
+        title,
+        {
+          "data-col": cleanTitle,
+          "data-index": index,
+          className: "header-cell",
+          key: "title-custom" + index,
+          style,
+        },
+        [childrenWithProps]
+      );
+      return React.cloneElement(
+        <div style={{ display: "flex" }} />,
+        {
+          "data-col": cleanTitle,
+          "data-index": index,
+          className: "header-cell",
+        },
+        [titleElement, icon]
+      );
+    } else {
+      if (sortIcon) {
+        return (
+          <span
+            draggable
+            data-col={cleanTitle}
+            data-index={index}
+            className="header-cell"
+            style={style}
+          >
+            {title} {sortIcon}
+          </span>
+        );
+      } else {
+        return (
+          <span
+            draggable
+            data-col={cleanTitle}
+            data-index={index}
+            className="header-cell"
+            style={style}
+          >
+            {title}
+          </span>
+        );
+      }
+    }
+  };
   /**
    * Render Table Header
    */
@@ -52,34 +137,40 @@ export default class DataTable extends React.Component {
       if (a.index > b.index) return 1;
       return -1;
     });
+    let sortIcon = null;
 
     let headerView = headers.map((header, index) => {
       let title = header.title;
       let cleanTitle =
-        typeof header.accessor === "function" ? header.title : header.accessor;
+        typeof header.accessor === "function"
+          ? typeof header.title === "object"
+            ? Utils.onlyText(header.title.props.children)
+            : header.title
+          : header.accessor;
       let width = header.width;
 
       if (this.state.sortby === index) {
         // title += this.state.descending ? "\u2193" : "\u2191";
-        title += this.state.descending ? "  ▾" : "  ▴";
+        sortIcon = this.state.descending ? "  ▾" : "  ▴";
+      } else {
+        sortIcon = null;
       }
 
       return (
         <th
-          key={cleanTitle}
+          key={cleanTitle + index}
           ref={(th) => (this[cleanTitle] = th)}
           style={{ width: width + "px" }}
           data-col={cleanTitle}
           data-index={index}
         >
-          <span
-            draggable
-            data-col={cleanTitle}
-            data-index={index}
-            className="header-cell"
-          >
-            {title}
-          </span>
+          {this.renderTableHeaderTitle(
+            title,
+            cleanTitle,
+            index,
+            sortIcon,
+            header.style
+          )}
         </th>
       );
     });
@@ -162,7 +253,7 @@ export default class DataTable extends React.Component {
               content = <img style={cell.style} src={content} alt="" />;
             }
           } else if (typeof cell === "function") {
-            content = cell(row);
+            content = cell(row, index);
           }
         }
 
@@ -204,7 +295,10 @@ export default class DataTable extends React.Component {
     let data = this.state.data.slice(); // Give new array
     let colIndex = Number(ReactDOM.findDOMNode(e.target).dataset.index);
     let colAccessor = this.state.headers[colIndex].accessor;
-
+    let sortable = this.state.headers[colIndex].sortable;
+    if (!sortable) {
+      return;
+    }
     let descending = !this.state.descending;
 
     data.sort((a, b) => {
@@ -279,7 +373,16 @@ export default class DataTable extends React.Component {
         if (!isEmpty(fieldValue) && typeof fieldValue === "object") {
           fieldValue = Utils.onlyText(fieldValue.props.children);
         }
-        inputId = "inp" + headers[idx].title.replace(/\s/g, "");
+        if (typeof headers[idx].title === "object") {
+          inputId =
+            "inp" +
+            Utils.onlyText(headers[idx].title.props.children).replace(
+              /\s/g,
+              ""
+            );
+        } else {
+          inputId = "inp" + headers[idx].title.replace(/\s/g, "");
+        }
       } else {
         if (fieldName.includes(".")) {
           let splitedcolAccessor = fieldName.split(".");
@@ -317,7 +420,7 @@ export default class DataTable extends React.Component {
         data: searchData,
         pagedData: searchData,
         search: this.props.searchable,
-        totalRecords: searchData.length,
+        totalItemsCount: searchData.length,
       },
       () => {
         if (this.pagination.enabled) {
@@ -345,7 +448,13 @@ export default class DataTable extends React.Component {
       let hdr = this[header.accessor];
       let inputId = "";
       if (typeof header.accessor === "function") {
-        inputId = "inp" + header.title.replace(/\s/g, "");
+        if (typeof header.title === "object") {
+          inputId =
+            "inp" +
+            Utils.onlyText(header.title.props.children).replace(/\s/g, "");
+        } else {
+          inputId = "inp" + header.title.replace(/\s/g, "");
+        }
       } else {
         inputId = "inp" + header.accessor;
       }
@@ -412,10 +521,10 @@ export default class DataTable extends React.Component {
     );
   };
 
-  onPageLengthChange = (pageLength) => {
+  onitemsCountPerPageChange = (itemsCountPerPage) => {
     this.setState(
       {
-        pageLength: parseInt(pageLength, 10),
+        itemsCountPerPage: parseInt(itemsCountPerPage, 10),
       },
       () => {
         this.onGotoPage(this.state.currentPage);
@@ -431,7 +540,7 @@ export default class DataTable extends React.Component {
         Startsorting: false,
         sortby: null,
       },
-      () => this.props.onPageChange(pageNo)
+      () => this.props.pagination.onPageChange(pageNo)
     );
   };
 
@@ -459,61 +568,112 @@ export default class DataTable extends React.Component {
 
   render() {
     return (
-      <div className={this.props.className}>
-        {this.pagination.enabled && this.pagination.position.join(', ').includes('top') && (
-          <Pagination
-            // type={this.props.pagination.type}
-            //totalRecords={this.props.totalRecords}
-            //pageLength={this.props.pagination.pageLength}
-            //onPageLengthChange={this.onPageLengthChange}
-            //onGotoPage={this.onGotoPage}
-            //currentPage={this.state.currentPage}
-            activePage={this.state.currentPage}
-            itemsCountPerPage={this.props.pagination.pageLength}
-            totalItemsCount={this.props.totalRecords}
-            onChange={this.onGotoPage.bind(this)}
-            pageRangeDisplayed={5}
-            position={this.pagination.position[0].includes('top') ? this.pagination.position[0] :this.pagination.position[1] }
-            //itemClass="item"
-            //innerClass=""
-            //activeClass="active"
-            //activeLinkClass="active"
-            //disabledClass="disabled item"
-          />
-        )}
+      <div className={cx(this.props.className, "data-table")}>
+        {this.pagination.enabled &&
+          this.pagination.position.join(", ").includes("top") && (
+            <Pagination
+              activePage={this.state.currentPage}
+              itemsCountPerPage={this.props.pagination.itemsCountPerPage}
+              totalItemsCount={this.props.totalItemsCount}
+              onChange={this.onGotoPage.bind(this)}
+              pageRangeDisplayed={this.props.pagination.pageRangeDisplayed}
+              position={
+                this.pagination.position[0].includes("top")
+                  ? this.pagination.position[0]
+                  : this.pagination.position[1]
+              }
+              innerClass={cx(this.props.pagination.innerClass, "pagination")}
+              activeClass={
+                this.props.pagination.activeClass
+                  ? this.props.pagination.activeClass
+                  : "active"
+              }
+              disabledClass={cx(this.props.pagination.innerClass, "disabled")}
+              itemClass={this.props.pagination.itemClass}
+              itemClassFirst={this.props.pagination.itemClassFirst}
+              itemClassPrev={this.props.pagination.itemClassPrev}
+              itemClassNext={this.props.pagination.itemClassNext}
+              itemClassLast={this.props.pagination.itemClassLast}
+              activeLinkClass={this.props.pagination.activeLinkClass}
+              disabledClass={this.props.pagination.disabledClass}
+              prevPageText={this.props.pagination.prevPageText}
+              firstPageText={this.pagination.firstPageText}
+              lastPageText={this.props.pagination.lastPageText}
+              nextPageText={this.props.pagination.nextPageText}
+              getPageUrl={this.props.pagination.getPageUrl}
+              activeLinkClass={this.props.pagination.activeLinkClass}
+              hideDisabled={this.props.pagination.hideDisabled}
+              hideNavigation={this.props.pagination.hideNavigation}
+              hideFirstLastPages={this.props.pagination.hideFirstLastPages}
+              linkClass={this.props.pagination.linkClass}
+              linkClassFirst={this.props.pagination.linkClassFirst}
+              linkClassPrev={this.props.pagination.linkClassPrev}
+              linkClassNext={this.props.pagination.linkClassNext}
+              linkClassLast={this.props.pagination.linkClassLast}
+            />
+          )}
         {this.renderTable()}
-        {this.pagination.enabled && this.pagination.position.join(', ').includes('bottom') && (
-          <Pagination
-            // type={this.props.pagination.type}
-            //totalRecords={this.props.totalRecords}
-            //pageLength={this.props.pagination.pageLength}
-            //onPageLengthChange={this.onPageLengthChange}
-            //onGotoPage={this.onGotoPage}
-            //currentPage={this.state.currentPage}
-            activePage={this.state.currentPage}
-            itemsCountPerPage={this.props.pagination.pageLength}
-            totalItemsCount={this.props.totalRecords}
-            onChange={this.onGotoPage.bind(this)}
-            pageRangeDisplayed={5}
-            position={this.pagination.position[0].includes('bottom') ? this.pagination.position[0] :this.pagination.position[1] }
-            //itemClass="item"
-            //innerClass=""
-            //activeClass="active"
-            //activeLinkClass="active"
-            //disabledClass="disabled item"
-          />
-        )}
+        {this.pagination.enabled &&
+          this.pagination.position.join(", ").includes("bottom") && (
+            <Pagination
+              activePage={this.state.currentPage}
+              itemsCountPerPage={this.props.pagination.itemsCountPerPage}
+              totalItemsCount={this.props.totalItemsCount}
+              onChange={this.onGotoPage.bind(this)}
+              pageRangeDisplayed={this.props.pagination.pageRangeDisplayed}
+              position={
+                this.pagination.position[0].includes("bottom")
+                  ? this.pagination.position[0]
+                  : this.pagination.position[1]
+              }
+              innerClass={cx(this.props.pagination.innerClass, "pagination")}
+              activeClass={
+                this.props.pagination.activeClass
+                  ? this.props.pagination.activeClass
+                  : "active"
+              }
+              disabledClass={cx(this.props.pagination.innerClass, "disabled")}
+              itemClass={this.props.pagination.itemClass}
+              itemClassFirst={this.props.pagination.itemClassFirst}
+              itemClassPrev={this.props.pagination.itemClassPrev}
+              itemClassNext={this.props.pagination.itemClassNext}
+              itemClassLast={this.props.pagination.itemClassLast}
+              activeLinkClass={this.props.pagination.activeLinkClass}
+              disabledClass={this.props.pagination.disabledClass}
+              prevPageText={this.props.pagination.prevPageText}
+              firstPageText={this.pagination.firstPageText}
+              lastPageText={this.props.pagination.lastPageText}
+              nextPageText={this.props.pagination.nextPageText}
+              getPageUrl={this.props.pagination.getPageUrl}
+              activeLinkClass={this.props.pagination.activeLinkClass}
+              hideDisabled={this.props.pagination.hideDisabled}
+              hideNavigation={this.props.pagination.hideNavigation}
+              hideFirstLastPages={this.props.pagination.hideFirstLastPages}
+              linkClass={this.props.pagination.linkClass}
+              linkClassFirst={this.props.pagination.linkClassFirst}
+              linkClassPrev={this.props.pagination.linkClassPrev}
+              linkClassNext={this.props.pagination.linkClassNext}
+              linkClassLast={this.props.pagination.linkClassLast}
+            />
+          )}
       </div>
     );
   }
 }
 
 DataTable.propTypes = {
-  currentPage: PropTypes.number.isRequired,
-  totalRecords: PropTypes.number.isRequired,
+  edit: PropTypes.bool,
+  width: PropTypes.string,
+  headers: PropTypes.arrayOf(PropTypes.object).isRequired,
+  data: PropTypes.array.isRequired,
+  noData: PropTypes.string,
+  onUpdate: PropTypes.func,
+  totalItemsCount: PropTypes.number.isRequired,
+  searchable: PropTypes.bool,
   pagination: PropTypes.shape({
     enabled: PropTypes.bool,
-    pageLength: function (props, propName, componentName) {
+    currentPage: PropTypes.number.isRequired,
+    itemsCountPerPage: function (props, propName, componentName) {
       // eslint-disable-next-line
       if (
         // eslint-disable-next-line
@@ -522,13 +682,15 @@ DataTable.propTypes = {
         (props[propName] == undefined || typeof props[propName] != "number")
       ) {
         const error = console.error;
-        console.error = function(warning, ...args) {
-          if (/Please provide pageLength paginate Proprty/.test(warning)) {
+        console.error = function (warning, ...args) {
+          if (
+            /Please provide itemsCountPerPage paginate Proprty/.test(warning)
+          ) {
             throw new Error(warning);
           }
           error.apply(console, [warning, ...args]);
         };
-        throw new Error("Please provide pageLength paginate Proprty");
+        throw new Error("Please provide itemsCountPerPage paginate Proprty");
       }
     },
     position: function (props, propName, componentName) {
@@ -540,17 +702,22 @@ DataTable.propTypes = {
         (props[propName] == undefined || !Array.isArray(props[propName]))
       ) {
         const error = console.error;
-        console.error = function(warning, ...args) {
-          if (/Please provide paginate position Property with type array/.test(warning)) {
+        console.error = function (warning, ...args) {
+          if (
+            /Please provide paginate position Property with type array/.test(
+              warning
+            )
+          ) {
             throw new Error(warning);
           }
           error.apply(console, [warning, ...args]);
         };
-        throw new Error("Please provide paginate position Property with type array");
+        throw new Error(
+          "Please provide paginate position Property with type array"
+        );
       }
     },
-    type: PropTypes.string,
+    pageRangeDisplayed: PropTypes.number,
+    onPageChange: PropTypes.func.isRequired,
   }),
-  onPageChange: PropTypes.func.isRequired,
-  pageRangeDisplayed: PropTypes.number,
 };

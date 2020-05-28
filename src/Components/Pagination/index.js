@@ -210,9 +210,11 @@ export default class Pagination extends React.Component {
     let style = {};
     switch (true) {
       case position.includes("left"):
-        style = { justifyContent: "flex-start" };break;
+        style = { justifyContent: "flex-start" };
+        break;
       case position.includes("right"):
-        style = { justifyContent: "flex-end" };break;
+        style = { justifyContent: "flex-end" };
+        break;
       default:
         break;
     }

@@ -25,16 +25,7 @@
 }
 
 .data-table th {
-  /* background-color: whitesmoke;
-  padding: 7px;
-  position: relative;
-  border: 1px solid #e5e5e5;
-  text-align: left;
-  font-weight: normal;
-  line-height: 2em; */
   color: #fff;
-  /* background-color: #343a40;
-  border-color: #454d55; */
   vertical-align: bottom;
   border-bottom: 2px solid #dee2e6;
   text-align: inherit;

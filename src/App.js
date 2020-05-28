@@ -8,15 +8,40 @@ class App extends Component {
     super(props);
     this.state = {
       headers: [
-        //{title:"Id",accessor: "id", index: 0, dataType: "number"},
-
-        { title: "#", accessor: "id", index: 1, dataType: "number" },
+        {
+          title: "avatar",
+          accessor: "avatar",
+          width: "300",
+          index: 1,
+          cell: {
+            type: "image",
+            style: {
+              width: "50px",
+            },
+          },
+        },
+        {
+          title: <button>id</button>,
+          accessor: "id",
+          index: 2,
+          sortable: true,
+          searchable: true,
+          style: {
+            background: "red",
+          },
+          //dataType: "number",
+        },
+        { title: "#", accessor: "id", index: 3, dataType: "number" },
         {
           title: "First Name",
           accessor: "first_name",
+          sortable: true,
           width: "200",
-          index: 2,
+          index: 4,
           searchable: true,
+          style: {
+            background: "green",
+          },
           dataType: "string",
         },
         {
@@ -24,7 +49,7 @@ class App extends Component {
           searchable: true,
           accessor: (d) => d.last_name,
           width: "300",
-          index: 3,
+          index: 5,
           dataType: "function",
         },
         {
@@ -37,7 +62,7 @@ class App extends Component {
             </span>
           ),
           width: "300",
-          index: 5,
+          index: 6,
           searchable: true,
           dataType: "function",
         },
@@ -47,15 +72,15 @@ class App extends Component {
           accessor: "doctor.average",
 
           width: "300",
-          index: 6,
+          index: 7,
         },
         {
           title: "Rating",
           accessor: "doctor.avg_rate",
-          searchable: true,
-          index: 7,
+          searchable: false,
+          index: 8,
           width: "200",
-          cell: (row) => {
+          cell: (row, index) => {
             return (
               <div className="rating">
                 <div
@@ -79,7 +104,7 @@ class App extends Component {
       last_page_url: null,
       next_page_url: null,
       per_page: 5,
-      totalRecords: 5,
+      totalItemsCount: 5,
       from: null,
       to: null,
     };
@@ -137,14 +162,13 @@ class App extends Component {
   };
   async componentDidMount() {
     let res = await this.search();
-    //console.log("res.per_page", res.per_page);
     this.setState({
       data: res.data,
       current_page: res.current_page,
       last_page_url: res.last_page_url,
       next_page_url: res.next_page_url,
       per_page: res.per_page,
-      totalRecords: res.total,
+      totalItemsCount: res.total,
       from: res.from,
       to: res.to,
     });
@@ -154,7 +178,6 @@ class App extends Component {
    * Handle Page Change
    */
   handlePageChange = async (pageNumber) => {
-    //console.log("handlePageChange", pageNumber);
     let res = await this.search(pageNumber);
     this.setState({
       data: res.data,
@@ -162,18 +185,19 @@ class App extends Component {
     });
   };
   render() {
-    // console.log("state per_page", this.state.per_page);
     const pagination = {
       enabled: true,
-      pageLength: this.state.per_page,
-      position: ["bottom left"]
-      //type: "long", // long, short
+      itemsCountPerPage: this.state.per_page,
+      position: ["bottom left", "top left"],
+      pageRangeDisplayed: 5,
+      onPageChange: this.handlePageChange,
+      currentPage: this.state.current_page,
+      prevPageText: "next",
+      lastPageText: "last",
     };
     return (
       <div>
         <DataTable
-          className="data-table"
-          title="USER PROFILES"
           keyField="id"
           edit={true}
           pagination={pagination}
@@ -182,10 +206,7 @@ class App extends Component {
           data={this.state.data}
           noData="No records!"
           onUpdate={this.onUpdateTable}
-          currentPage={this.state.current_page}
-          totalRecords={this.state.totalRecords}
-          pageRangeDisplayed={5}
-          onPageChange={this.handlePageChange}
+          totalItemsCount={this.state.totalItemsCount}
           //searchable
         />
       </div>
