@@ -24,8 +24,8 @@ react-datable is a lightweight, fast and extendable datagrid built for React
 - [Screenshot](#demo)
 - [Installation](#Installation)
 - [react-datable Props](#react-datable-Props)
-- [Headers Props](#react-datable-Headers-Props)
-- [Accessors](#Accessors)
+- [Headers Props](#Headers-Props)
+- [Accessors](#accessors)
 - [Custom Cell And Header](#Custom-Cell-And-Title-Rendering)
 - [Pagination Props](#Pagination-Props)
 - [Contributing](#Contributing)
@@ -71,7 +71,7 @@ npm i react-datable
 ```js
 import React from "react";
 import "./App.css";
-import reactTable from "react-datable";
+import ReactTable from "react-datable";
 
 class App extends Component {
   constructor(props) {
@@ -239,7 +239,7 @@ class App extends Component {
     };
     return (
       <div>
-        <reactTable
+        <ReactTable
           keyField="id"
           edit={true}
           pagination={pagination}
