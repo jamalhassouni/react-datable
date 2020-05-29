@@ -1,3 +1,3 @@
-import LaraTable from "./DataTable";
+import reactTable from "./DataTable";
 
-export default LaraTable;
+export default reactTable;

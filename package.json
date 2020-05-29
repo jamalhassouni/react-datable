@@ -15,7 +15,21 @@
       ]
     ]
   },
-  "description": "Datatable to work with Laravel Pagination and Reactjs",
+  "description": "react-datable is a lightweight, fast and extendable datagrid built for React",
+  "keywords": [
+    "react",
+    "component",
+    "datatable",
+    "data",
+    "modulable",
+    "table",
+    "material-ui",
+    "semantic-ui",
+    "react-semantic-ui",
+    "laravel",
+    "laravel-react",
+    "laravel table"
+  ],
   "main": "dist/index.js",
   "module": "dist/index.js",
   "author": "Jamal Hassouni",
