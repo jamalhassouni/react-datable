@@ -158,8 +158,6 @@ class App extends Component {
       next_page_url: null,
       per_page: 5,
       totalItemsCount: 5,
-      from: null,
-      to: null,
     };
   }
 
@@ -211,8 +209,6 @@ class App extends Component {
       next_page_url: res.next_page_url,
       per_page: res.per_page,
       totalItemsCount: res.total,
-      from: res.from,
-      to: res.to,
     });
   }
 
@@ -234,7 +230,9 @@ class App extends Component {
       pageRangeDisplayed: 5,
       onPageChange: this.handlePageChange,
       currentPage: this.state.current_page,
-      prevPageText: "next",
+      prevPageText: "prev",
+      nextPageText: "next",
+      firstPageText: "first",
       lastPageText: "last",
     };
     return (
@@ -260,25 +258,25 @@ export default App;
 
 ## react-datable Props
 
-| Name              | Type     | Default | Description                                                                                     |
-| ----------------- | -------- | ------- | ----------------------------------------------------------------------------------------------- |
-| `keyField`        | String   | id      | Primary key (used for edit data)                                                                |
-| `edit`            | Boolean  | false   | Data can be modified or not                                                                     |
-| `totalItemsCount` | Number   |         | **Required.** Total count of items which you are going to display                               |
-| `data`            | Array    |         | Array Of Data                                                                                   |
-| `noData`          | Array    | true    | Text of No records found                                                                        |
-| `searchable`      | Boolean  | true    | Data can be filtered or not                                                                     |
-| `pagination`      | Object   |         | Object of the Pagination props                                                                  |
-| `onUpdate`        | Function |         | Item data change handler when edited. Receive field, id, value as arg                           |
-| `width`           | String   | "100%"  | width of Table                                                                                  |
-| `headers`         | Array    |         | **Required.** Table Headers an array of objects containing the following properties (See below) |
+| Name              | Type     | Default                                                                                                             | Description                                                                                     |
+| ----------------- | -------- | ------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `keyField`        | String   | id                                                                                                                  | Primary key (used for edit data)                                                                |
+| `edit`            | Boolean  | false                                                                                                               | Data can be modified or not                                                                     |
+| `totalItemsCount` | Number   |                                                                                                                     | **Required.** Total count of items which you are going to display                               |
+| `data`            | Array    |                                                                                                                     | Array Of Data                                                                                   |
+| `noData`          | String   | "No records found!"                                                                                                 | Text of No records found                                                                        |
+| `searchable`      | Boolean  | true                                                                                                                | Data can be filtered or not                                                                     |
+| `pagination`      | Object   | `{enabled: true,position: ["bottom left", "top left"], currentPage: 1,itemsCountPerPage: 10,pageRangeDisplayed: 5}` | Object of the Pagination props                                                                  |
+| `onUpdate`        | Function |                                                                                                                     | Item data change handler when edited. Receive field, id, value as arg                           |
+| `width`           | String   | "100%"                                                                                                              | width of Table                                                                                  |
+| `headers`         | Array    |                                                                                                                     | **Required.** Table Headers an array of objects containing the following properties (See below) |
 
 ## Headers Props
 
 | Name         | Type                  | Default | Description                                                                                                                               |
 | ------------ | --------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | `title`      | String / ReactElement |         | **Required.** Text of header (see [Custom Title](#Custom-Cell-And-Title-Rendering) section for more details)                              |
-| `accessor`   | Boolean               | false   | **Required.** propertyName or Accessor eg. (row) => row.propertyName (see [Accessors](#Accessors) section for more details)               |
+| `accessor`   | String Or Function    |         | **Required.** propertyName or Accessor eg. (row) => row.propertyName (see [Accessors](#Accessors) section for more details)               |
 | `width`      | Number                |         | **Required.** width of Field                                                                                                              |
 | `index`      | Number                |         | **Required.** This represents the position of the field in the table                                                                      |
 | `cell`       | Object Or Function    |         | custom property eg. cell: {type: "image",style: { width:"50px",}}(see [Cells](#Custom-Cell-And-Title-Rendering) section for more details) |
